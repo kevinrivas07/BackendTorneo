@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+
 const app = express();
-const PORT = 5000;
 
 app.use(cors());
 app.use(express.json());
@@ -9,6 +9,10 @@ app.use(express.json());
 let jugadoresEquipos = [];
 let historialPartidos = [];
 let partidoIdCounter = 1;
+
+/* =======================
+   TODAS TUS RUTAS IGUALES
+======================= */
 
 app.get('/api/torneo', (req, res) => {
     const tablaOrdenada = [...jugadoresEquipos].sort((a, b) => {
@@ -22,10 +26,13 @@ app.get('/api/torneo', (req, res) => {
 
 app.post('/api/torneo/rifar', (req, res) => {
     const { nombres, nombresEquipos } = req.body;
+
     if (!nombres || !nombresEquipos || nombres.length !== nombresEquipos.length) {
         return res.status(400).json({ error: "La cantidad de jugadores y equipos debe ser igual" });
     }
+
     const equiposMezclados = [...nombresEquipos].sort(() => Math.random() - 0.5);
+
     jugadoresEquipos = nombres.map((jugador, index) => ({
         id: index + 1,
         jugador,
@@ -34,13 +41,16 @@ app.post('/api/torneo/rifar', (req, res) => {
         goles_favor: 0,
         goles_contra: 0
     }));
+
     historialPartidos = [];
     partidoIdCounter = 1;
+
     res.json(jugadoresEquipos);
 });
 
 app.post('/api/torneo/manual', (req, res) => {
     const { parejas } = req.body;
+
     jugadoresEquipos = parejas.map((p, index) => ({
         id: index + 1,
         jugador: p.jugador,
@@ -49,8 +59,10 @@ app.post('/api/torneo/manual', (req, res) => {
         goles_favor: 0,
         goles_contra: 0
     }));
+
     historialPartidos = [];
     partidoIdCounter = 1;
+
     res.json(jugadoresEquipos);
 });
 
@@ -128,7 +140,7 @@ app.put('/api/torneo/partido/:id', (req, res) => {
     const eq2 = jugadoresEquipos.find(e => e.id === partido.id_equipo2);
 
     if (eq1 && eq2) {
-        // Revertir
+        // revertir
         eq1.goles_favor -= partido.goles_equipo1;
         eq1.goles_contra -= partido.goles_equipo2;
         eq2.goles_favor -= partido.goles_equipo2;
@@ -138,9 +150,10 @@ app.put('/api/torneo/partido/:id', (req, res) => {
         else if (partido.resultado === 'gana2') { eq2.pg -= 1; eq2.puntos -= 3; eq1.pp -= 1; }
         else { eq1.pe -= 1; eq1.puntos -= 1; eq2.pe -= 1; eq2.puntos -= 1; }
 
-        // Aplicar nuevo
+        // aplicar nuevo
         const g1 = parseInt(golesEquipo1) || 0;
         const g2 = parseInt(golesEquipo2) || 0;
+
         eq1.goles_favor += g1; eq1.goles_contra += g2;
         eq2.goles_favor += g2; eq2.goles_contra += g1;
 
@@ -163,6 +176,5 @@ app.delete('/api/torneo/reiniciar', (req, res) => {
     res.json({ mensaje: "Torneo reiniciado" });
 });
 
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
+
+module.exports = app;
