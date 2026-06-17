@@ -10,4 +10,11 @@ app.use(express.json());
 
 app.use("/api/torneo", torneoRoutes);
 
+app.get("/test", (req, res) => {
+  res.json({
+    ok: true,
+    mongoUriExiste: !!process.env.MONGO_URI
+  });
+});
+
 module.exports = app;
