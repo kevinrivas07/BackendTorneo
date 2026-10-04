@@ -45,6 +45,18 @@ app.get("/", (req, res) => {
 
 app.use("/api/torneo", torneoRoutes);
 
+app.get("/api/diagnostico", (req, res) => {
+  res.json({
+    mensaje: "ESTE ES EL BACKEND NUEVO",
+    version: "2026-10-03-TEST",
+    rutas: [
+      "GET /api/torneo",
+      "GET /api/torneo/partidos",
+      "POST /api/torneo/partido",
+      "DELETE /api/torneo/reiniciar"
+    ]
+  });
+});
 // ==========================
 // RUTA PARA ERRORES 404
 // ==========================
