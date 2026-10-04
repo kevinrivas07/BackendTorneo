@@ -23,12 +23,6 @@ app.use(
 app.use(express.json());
 
 // ==========================
-// CONEXIÓN A MONGODB
-// ==========================
-
-conectarDB();
-
-// ==========================
 // RUTA PRINCIPAL
 // ==========================
 
@@ -40,10 +34,8 @@ app.get("/", (req, res) => {
 });
 
 // ==========================
-// RUTAS DEL TORNEO
+// DIAGNÓSTICO
 // ==========================
-
-app.use("/api/torneo", torneoRoutes);
 
 app.get("/api/diagnostico", (req, res) => {
   res.json({
@@ -57,8 +49,32 @@ app.get("/api/diagnostico", (req, res) => {
     ]
   });
 });
+
 // ==========================
-// RUTA PARA ERRORES 404
+// RUTAS DEL TORNEO + MONGODB
+// ==========================
+
+app.use(
+  "/api/torneo",
+  async (req, res, next) => {
+    try {
+      await conectarDB();
+      next();
+    } catch (error) {
+      console.error("❌ MongoDB no disponible:", error.message);
+
+      res.status(500).json({
+        ok: false,
+        mensaje: "No se pudo conectar con MongoDB",
+        error: error.message,
+      });
+    }
+  },
+  torneoRoutes
+);
+
+// ==========================
+// 404
 // ==========================
 
 app.use((req, res) => {
@@ -69,7 +85,7 @@ app.use((req, res) => {
 });
 
 // ==========================
-// MANEJO DE ERRORES
+// ERRORES
 // ==========================
 
 app.use((error, req, res, next) => {
@@ -93,9 +109,5 @@ if (process.env.NODE_ENV !== "production") {
     console.log(`✅ Servidor iniciado en http://localhost:${PORT}`);
   });
 }
-
-// ==========================
-// EXPORTAR PARA VERCEL
-// ==========================
 
 module.exports = app;
