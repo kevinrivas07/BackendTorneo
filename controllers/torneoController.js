@@ -7,22 +7,35 @@ const Partido = require("../models/Partido");
 
 exports.obtenerTabla = async (req, res) => {
   try {
-    const tabla = await Equipo.find();
+    const equipos = await Equipo.find();
 
-    tabla.sort((a, b) => {
-      if (b.puntos !== a.puntos) {
-        return b.puntos - a.puntos;
-      }
+    const tabla = equipos
+      .map((equipo) => ({
+        id: equipo._id.toString(),
+        jugador: equipo.jugador,
+        equipo: equipo.equipo,
+        pj: equipo.pj,
+        pg: equipo.pg,
+        pe: equipo.pe,
+        pp: equipo.pp,
+        puntos: equipo.puntos,
+        goles_favor: equipo.goles_favor,
+        goles_contra: equipo.goles_contra,
+      }))
+      .sort((a, b) => {
+        if (b.puntos !== a.puntos) {
+          return b.puntos - a.puntos;
+        }
 
-      const difA = a.goles_favor - a.goles_contra;
-      const difB = b.goles_favor - b.goles_contra;
+        const difA = a.goles_favor - a.goles_contra;
+        const difB = b.goles_favor - b.goles_contra;
 
-      return difB - difA;
-    });
+        return difB - difA;
+      });
 
     res.json(tabla);
   } catch (error) {
-    console.error(error);
+    console.error("Error obtenerTabla:", error);
 
     res.status(500).json({
       mensaje: "Error al obtener la tabla",
